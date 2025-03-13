@@ -27,16 +27,11 @@ def update_ds_and_refresh_ui(selection, color_window, cleaned_df):
         "octagon": "8",
         "plus": "+",
         "cross": "x",
-        "filled_square": "S",
-        "filled_circle": "O",
-        "filled_triangle": "v",
-        "filled_diamond": "d",
-        "thin_diamond": "|",
+        "inverse_triangle": "v",
+        "thin_diamond": "d",
         "hourglass": "H",
-        "tick_left": "<",
-        "tick_right": ">",
-        "tick_up": "^",
-        "tick_down": "v",
+        "triangle_left": "<",
+        "triangle_right": ">",
         "horizontal_line": "_",
         "vertical_line": "|"
     }
@@ -96,17 +91,22 @@ def open_color_window(self):
     # Create a new window for manual color editing
     self.color_window = tk.Toplevel(self)
     self.color_window.title("Edit Colors")
+    self.color_window.geometry("1000x600")
+
+
+    scrollable_frame = ctk.CTkScrollableFrame(self.color_window)
+    scrollable_frame.pack(fill="both", expand=True)
 
     # Combobox to select the column for shape mapping
-    column_label = ctk.CTkLabel(self.color_window, text="Define shape by")
+    column_label = ctk.CTkLabel(scrollable_frame, text="Define shape by")
     column_label.grid(row=0, column=4, padx=10, pady=10)
 
-    color_label = ctk.CTkLabel(self.color_window, text='*Color Options from "Filter by" Column')
+    color_label = ctk.CTkLabel(scrollable_frame, text='*Color Options from "Filter by" Column')
     color_label.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
     
     column_options = [col for col in self.cleaned_df.columns if '_ppm' not in col.lower() and '_pct' not in col.lower()]
     column_select_combo = ctk.CTkComboBox(
-        self.color_window,
+        scrollable_frame,
         values=column_options,
         state="readonly",
         command=lambda selection: update_ds_and_refresh_ui(selection, self.color_window, self.cleaned_df)
@@ -114,30 +114,29 @@ def open_color_window(self):
     column_select_combo.set(column_to_use)
     column_select_combo.grid(row=0, column=5, padx=10, pady=10, columnspan=3, sticky="ew")
 
-
     # Lithologies Section
-    lithology_label = ctk.CTkLabel(self.color_window, text=self.selected_column)
+    lithology_label = ctk.CTkLabel(scrollable_frame, text=self.selected_column)
     lithology_label.grid(row=1, column=0, padx=10, pady=10)
 
-    color_label = ctk.CTkLabel(self.color_window, text="Color")
+    color_label = ctk.CTkLabel(scrollable_frame, text="Color")
     color_label.grid(row=1, column=1, padx=10, pady=10)
 
-    visual_label = ctk.CTkLabel(self.color_window, text="Selected Color")
+    visual_label = ctk.CTkLabel(scrollable_frame, text="Selected Color")
     visual_label.grid(row=1, column=2, padx=10, pady=10)
 
     # Generate the list of comboboxes for lithology color selection
     for idx, lithology in enumerate(self.lithologies):
         # Label for lithology
-        litho_label = ctk.CTkLabel(self.color_window, text=lithology)
+        litho_label = ctk.CTkLabel(scrollable_frame, text=lithology)
         litho_label.grid(row=idx + 2, column=0, padx=10, pady=5)
 
         # Small rectangle to visualize the selected color
-        color_visual = ttk.Label(self.color_window, text="   ", background=color_map.get(str(lithology), "black"))
+        color_visual = ttk.Label(scrollable_frame, text="   ", background=color_map.get(str(lithology), "black"))
         color_visual.grid(row=idx + 2, column=2, padx=10, pady=5)
 
         # Combobox for selecting color
         color_combo = ctk.CTkComboBox(
-            self.color_window, 
+            scrollable_frame, 
             values=[
                 "lime", "green", "olive",
                 "blue", "navy", "teal", "cyan", "turquoise", "indigo",
@@ -154,13 +153,13 @@ def open_color_window(self):
         color_combo.grid(row=idx + 2, column=1, padx=10, pady=5)
             
     # Rock Units Section
-    rock_label = ctk.CTkLabel(self.color_window, text=column_to_use)
+    rock_label = ctk.CTkLabel(scrollable_frame, text=column_to_use)
     rock_label.grid(row=1, column=4, padx=10, pady=10)
     
-    shape_label = ctk.CTkLabel(self.color_window, text="Shape")
+    shape_label = ctk.CTkLabel(scrollable_frame, text="Shape")
     shape_label.grid(row=1, column=5, padx=10, pady=10)
     
-    shape_visual_label = ctk.CTkLabel(self.color_window, text="Selected Shape")
+    shape_visual_label = ctk.CTkLabel(scrollable_frame, text="Selected Shape")
     shape_visual_label.grid(row=1, column=6, padx=10, pady=10)
     
     # Define a mapping between user-friendly names and symbols
@@ -175,63 +174,29 @@ def open_color_window(self):
         "octagon": "8",
         "plus": "+",
         "cross": "x",
-        "filled_square": "S",
-        "filled_circle": "O",
-        "filled_triangle": "v",
-        "filled_diamond": "d",
-        "thin_diamond": "|",
+        "inverse_triangle": "v",
+        "thin_diamond": "d",
         "hourglass": "H",
-        "tick_left": "<",
-        "tick_right": ">",
-        "tick_up": "^",
-        "tick_down": "v",
+        "triangle_left": "<",
+        "triangle_right": ">",
         "horizontal_line": "_",
         "vertical_line": "|"
     }
-    
-    # Define the reverse mapping (symbols to names) for setting the default value
-    #symbol_to_shape_name = {v: k for k, v in shape_name_to_symbol.items()}
-    
-    self.shape_index = self.cleaned_df[column_to_use].unique()
-    # # Rock Units Section
-    # for idx, rock_unit in enumerate(self.shape_index):
-    #     # Label for rock unit
-    #     rock_label = ctk.CTkLabel(self.color_window, text=rock_unit)
-    #     rock_label.grid(row=idx + 2, column=4, padx=10, pady=5)
-    
-    #     # Get the default shape symbol
-    #     default_shape_symbol = color_map1.get(rock_unit, ds.loc[ds['Shape'] == rock_unit, 'Shapes'].values[0])
-        
-    #     # Convert the symbol to a user-friendly name for display in the combobox
-    #     default_shape_name = symbol_to_shape_name.get(default_shape_symbol, "triangle")  # Default to "triangle" if not found
-                
-    #     # Text to visualize the selected shape symbol
-    #     rock_shape_visual = ttk.Label(self.color_window, text=default_shape_symbol)
-    #     rock_shape_visual.grid(row=idx + 2, column=6, padx=10, pady=5)
-    
-    #     # Combobox for selecting shape (display names instead of symbols)
-    #     rock_shape_combo = ctk.CTkComboBox(
-    #         self.color_window, 
-    #         values=list(shape_name_to_symbol.keys()),
-    #         state="readonly", 
-    #         command=lambda selected_value, rock_unit=rock_unit, rock_shape_visual=rock_shape_visual: update_rock_shape_visual(selected_value, rock_unit, rock_shape_visual, shape_name_to_symbol)
-    #     )
-    #     rock_shape_combo.set(default_shape_name)
-    #     rock_shape_combo.grid(row=idx + 2, column=5, padx=10, pady=5)
 
-    # Rock Units Section
+    self.shape_index = self.cleaned_df[column_to_use].unique()
+
     for idx, rock_unit in enumerate(self.shape_index):
         # Label for rock unit
-        rock_label = ctk.CTkLabel(self.color_window, text=rock_unit)
+        rock_label = ctk.CTkLabel(scrollable_frame, text=rock_unit)
         rock_label.grid(row=idx + 2, column=4, padx=10, pady=5)
 
         # Small rectangle to visualize the selected shape symbol
-        rock_shape_visual = ttk.Label(self.color_window, text=color_map1.get(rock_unit, "^"))
+        rock_shape_visual = ttk.Label(scrollable_frame, text=color_map1.get(rock_unit, "^"))
         rock_shape_visual.grid(row=idx + 2, column=6, padx=10, pady=5)
 
         # Combobox for selecting shape symbol
         rock_shape_combo = ctk.CTkComboBox(
-            self.color_window, 
+            scrollable_frame, 
             values=list(shape_name_to_symbol.keys()),
             state="readonly", 
             command=lambda selected_value, rock_unit=rock_unit, rock_shape_visual=rock_shape_visual: update_rock_shape_visual(selected_value, rock_unit, rock_shape_visual, shape_name_to_symbol)
@@ -239,13 +204,14 @@ def open_color_window(self):
         rock_shape_combo.set(color_map1.get(rock_unit, "^"))  # Set default color or shape symbol
         rock_shape_combo.grid(row=idx + 2, column=5, padx=10, pady=5)
 
-
     # Apply Button to save the changes
     # apply_button = ctk.CTkButton(self.color_window, text="Apply Colors", command=lambda: apply_color_change(self))
     # apply_button.grid(row=max(len(self.lithologies), len(ds['Shape'].unique())) + 3, column=0, columnspan=7, stick = "ew", padx=10, pady=(10,0))
 
-    label = ctk.CTkLabel(self.color_window, text="Redraw graphs to apply change")
+    label = ctk.CTkLabel(scrollable_frame, text="Redraw graphs to apply change")
     label.grid(row=max(len(self.lithologies), len(ds['Shape'].unique())) + 4, column=0, columnspan=7, stick = "ew", padx=10, pady=(0,10))
+
+
     
 def update_color_visual(selected_value, lithology, color_visual):
     # Declare dc as global to access the global dataframe

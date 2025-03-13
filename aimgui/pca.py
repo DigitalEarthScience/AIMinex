@@ -98,4 +98,14 @@ class PCA_class:
             for i, variance in enumerate(explained_variance_ratio, start=1):
                 self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
         else:
-            self.output_text.insert("end", "Kernel PCA does not provide explained variance ratio.\n")
+            # Kernel PCA doesn't directly provide the explained variance ratio.
+            # We estimate it from the eigenvalues.
+            self.output_text.insert("end", "Kernel PCA doesn\'t directly provide the explained variance ratio.\n")
+            self.output_text.insert("end", "We estimate them using the eigenvalues!\n")
+            # Eigenvalues from the Kernel PCA
+            eigenvalues = self.pca.eigenvalues_
+            
+            # Explained variance ratio
+            explained_variance_ratio = eigenvalues / np.sum(eigenvalues)
+            for i, variance in enumerate(explained_variance_ratio, start=1):
+                self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')

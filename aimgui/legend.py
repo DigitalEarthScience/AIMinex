@@ -1,12 +1,12 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from . import color_change
 from .custom_toolbar import CustomToolbar
 from matplotlib.lines import Line2D
 
 def legend(self):
     # Create and display legends for lithology and rock type
+    from . import color_change
     Legend = self.var1.get() == 1
     if Legend:
         for widget in self.legend_frame.winfo_children():
@@ -24,9 +24,9 @@ def legend(self):
             #print (f"color_map{color_change.color_map}")
             for lithology in unique_lithologies:
                 color = color_change.color_map[lithology.title()]
-                l1 = Line2D([], [], color=color, marker='o', linestyle='None', label=lithology)
+                l1 = Line2D([], [], color=color, marker='o', linestyle='None', markeredgewidth=1.5, label=lithology)
                 handle1.append(l1)
-                label1.append(lithology)
+                label1.append(lithology.title())
     
             # For shapes
             handle2 = []
@@ -35,9 +35,9 @@ def legend(self):
             for shape in unique_shapes:
                 str(shape).strip().lower()
                 marker = color_change.color_map1[shape]
-                l2 = Line2D([], [], color='black', marker=marker, linestyle='None', label=shape)
+                l2 = Line2D([], [], color='black', marker=marker, linestyle='None', markeredgewidth=1.5, label=shape)
                 handle2.append(l2)
-                label2.append(shape)
+                label2.append(shape.title())
     
             total_entries = len(label1) + len(label2)
             height_per_entry = 0.19
@@ -50,7 +50,7 @@ def legend(self):
             axx = figx.add_subplot(111)
             axx.axis('off')
 
-            self.legend1 = axx.legend(handle1, label1, loc='upper left', bbox_to_anchor=(0, 1), title=self.selected_column, fontsize=10, labelspacing=0.3)
+            self.legend1 = axx.legend(handle1, label1, loc='upper left', bbox_to_anchor=(0, 1), title=str(self.selected_column).title(), fontsize=10, labelspacing=0.3)
 
             # Get the bounding box of the first legend in axis coordinates
             figx.canvas.draw()
@@ -61,7 +61,7 @@ def legend(self):
 
             second_legend_y = bbox.y0
 
-            self.legend2 = axx.legend(handle2, label2, loc='upper left', bbox_to_anchor=(0, second_legend_y), title=column_to_use, fontsize=10, labelspacing=0.3)
+            self.legend2 = axx.legend(handle2, label2, loc='upper left', bbox_to_anchor=(0, second_legend_y), title=str(column_to_use).title(), fontsize=10, labelspacing=0.3)
             axx.add_artist(self.legend1)
             axx.add_artist(self.legend2)
 
