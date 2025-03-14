@@ -95,8 +95,8 @@ class PCA_class:
         # Output the explained variance ratio for each principal component
         if isinstance(self.pca, PCA) and hasattr(self.pca, 'explained_variance_ratio_'):
             explained_variance_ratio = self.pca.explained_variance_ratio_
-            for i, variance in enumerate(explained_variance_ratio, start=1):
-                self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
+            #for i, variance in enumerate(explained_variance_ratio, start=1):
+            #    self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
         else:
             # Kernel PCA doesn't directly provide the explained variance ratio.
             # We estimate it from the eigenvalues.
@@ -107,5 +107,21 @@ class PCA_class:
             
             # Explained variance ratio
             explained_variance_ratio = eigenvalues / np.sum(eigenvalues)
-            for i, variance in enumerate(explained_variance_ratio, start=1):
-                self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
+            #for i, variance in enumerate(explained_variance_ratio, start=1):
+            #    self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
+                
+        cumulative_variance = np.cumsum(explained_variance_ratio)
+        # Create a DataFrame for tabular display
+        df = pd.DataFrame({
+            '"Principal Component"': [f'PC{i+1}' for i in range(len(explained_variance_ratio))],
+            '"Explained Variance"': [f"{ev:.2%}" for ev in explained_variance_ratio],
+            '"Cumulative Explained Variance"': [f"{cv:.2%}" for cv in cumulative_variance]
+        })
+        
+        # Convert the DataFrame to a string
+        df_str = df.to_string(index=False)
+
+        # Display the table
+        # Insert the string into the Text widget
+        self.output_text.insert("end", "PCA Explained Variance:\n")
+        self.output_text.insert("end", df_str + "\n")
