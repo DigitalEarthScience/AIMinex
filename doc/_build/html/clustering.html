@@ -1,19 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Types of Clustering Methods &#8212; AIMinex 1.0.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=cb25574f" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Modifying Color/Shape options" href="colornshape.html" />
@@ -35,57 +32,57 @@
           <div class="body" role="main">
             
   <section id="types-of-clustering-methods">
-<h1>Types of Clustering Methods<a class="headerlink" href="#types-of-clustering-methods" title="Permalink to this heading">¶</a></h1>
+<h1>Types of Clustering Methods<a class="headerlink" href="#types-of-clustering-methods" title="Link to this heading">¶</a></h1>
 <section id="k-means-clustering">
-<h2>K-means Clustering<a class="headerlink" href="#k-means-clustering" title="Permalink to this heading">¶</a></h2>
+<h2>K-means Clustering<a class="headerlink" href="#k-means-clustering" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 </div>
 </section>
 <section id="hierarchical-clustering">
-<h2>Hierarchical Clustering<a class="headerlink" href="#hierarchical-clustering" title="Permalink to this heading">¶</a></h2>
+<h2>Hierarchical Clustering<a class="headerlink" href="#hierarchical-clustering" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">Hierarchical clustering builds a dendrogram to represent the tendency to concentrate data points gradually. There are two main types: agglomerative (bottom-up) and divisive (top-down). In the agglomerative approach used in the MineralAI program, for every data point, a new cluster is created (that means, each data point is a cluster), and clusters are merged iteratively until the tree ends. This method is capable of capturing hierarchies, but it is highly computationally expensive for big datasets.</div>
 </div>
 </section>
 <section id="dbscan-density-based-spatial-clustering-of-applications-with-noise">
-<h2>DBSCAN (Density-Based Spatial Clustering of Applications with Noise)<a class="headerlink" href="#dbscan-density-based-spatial-clustering-of-applications-with-noise" title="Permalink to this heading">¶</a></h2>
+<h2>DBSCAN (Density-Based Spatial Clustering of Applications with Noise)<a class="headerlink" href="#dbscan-density-based-spatial-clustering-of-applications-with-noise" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">DBSCAN is a clustering method based on density group data points according to the density area of the data points. Its clusters are areas of high densities, separated by regions of low densities; thus, it can find clusters of arbitrary shape and handle noise (outliers) efficiently. The algorithm requires two parameters: the radius ϵepsilonϵ to define the neighbourhood of a point and the minimum number of points required to form a dense region. It does not require specifying the number of clusters in advance.</div>
 </div>
 </section>
 <section id="mean-shift-clustering">
-<h2>Mean Shift Clustering<a class="headerlink" href="#mean-shift-clustering" title="Permalink to this heading">¶</a></h2>
+<h2>Mean Shift Clustering<a class="headerlink" href="#mean-shift-clustering" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">Mean Shift clustering is a non-parametric method that searches for dense regions in the feature space. It works by iteratively shifting each data point towards the mode (highest density point) within a defined window until convergence. The resulting clusters are areas where the points converge. This method can automatically detect the number of clusters and is suitable for arbitrary-shaped clusters but can be computationally intensive for large datasets.</div>
 </div>
 </section>
 <section id="spectral-clustering">
-<h2>Spectral Clustering<a class="headerlink" href="#spectral-clustering" title="Permalink to this heading">¶</a></h2>
+<h2>Spectral Clustering<a class="headerlink" href="#spectral-clustering" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">Spectral clustering uses the eigenvalues of a similarity matrix to reduce the dimensionality of the data before applying a clustering method like K-means. It is effective for detecting non-convex clusters and clusters connected by complex relationships. The method involves constructing a similarity graph, computing the graph’s Laplacian matrix, and then using its eigenvectors for clustering.</div>
 </div>
 </section>
 <section id="gaussian-mixture-models-gmm">
-<h2>Gaussian Mixture Models (GMM)<a class="headerlink" href="#gaussian-mixture-models-gmm" title="Permalink to this heading">¶</a></h2>
+<h2>Gaussian Mixture Models (GMM)<a class="headerlink" href="#gaussian-mixture-models-gmm" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">The Gaussian mixture model is a soft clustering technique to determine the probability that a given data point belongs to a cluster. It is a probabilistic model that assumes the data is generated from a mixture of several Gaussian distributions with unknown parameters. Each cluster is represented by a Gaussian distribution, and the model estimates the parameters using the Expectation-Maximization (EM) algorithm. GMM can handle clusters with different shapes and sizes but requires specifying the number of components (clusters).</div>
 </div>
 </section>
 <section id="affinity-propagation">
-<h2>Affinity Propagation<a class="headerlink" href="#affinity-propagation" title="Permalink to this heading">¶</a></h2>
+<h2>Affinity Propagation<a class="headerlink" href="#affinity-propagation" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">Affinity Propagation clustering does not require specifying the number of clusters beforehand. Instead, it identifies a set of representative points (exemplars) by iteratively passing messages between data points. These messages reflect the suitability of points and their preference to be exemplars. The method is effective for detecting clusters of various shapes and sizes but can be computationally heavy.</div>
 </div>
 </section>
 <section id="birch-balanced-iterative-reducing-and-clustering-using-hierarchies">
-<h2>BIRCH (Balanced Iterative Reducing and Clustering using Hierarchies)<a class="headerlink" href="#birch-balanced-iterative-reducing-and-clustering-using-hierarchies" title="Permalink to this heading">¶</a></h2>
+<h2>BIRCH (Balanced Iterative Reducing and Clustering using Hierarchies)<a class="headerlink" href="#birch-balanced-iterative-reducing-and-clustering-using-hierarchies" title="Link to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">K-means clustering organizes a dataset into k clusters by using the nearest means. K-means clustering starts by randomly initializing k-cluster centroids, then the data points are assigned to the closest cluster centroid, and the centroids of all clusters are recalculated based on the mean of the assigned points. Two steps are iteratively performed until the changes to the centroids become insignificant or a limit of iterations is reached. K-means is well suited for large datasets, but it is possible that it will be frozen at a local minimum.</div>
 <div class="line">BIRCH is a hierarchical clustering method designed for very large datasets. It clusters multi-dimensional metric data points to create a clustering feature tree (CF tree) that summarizes the dataset. The algorithm uses these features to form clusters by iteratively refining the tree and clustering the leaf nodes. BIRCH is efficient and scalable, handling large datasets well, but it may not perform as effectively on datasets with clusters of varying densities.</div>
@@ -174,7 +171,7 @@
       &copy;2024, Digital Earth Science and Engineering Lab.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

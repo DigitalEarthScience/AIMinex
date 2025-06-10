@@ -6,6 +6,9 @@
 AIMinex's User Manual
 =====================================
 
+.. image:: ../images/doc/aiminex_main.png
+   :width: 100%
+
 In the section below you will find detailed explanation to use the program and frequent questions.
 
 .. toctree::
