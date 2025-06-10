@@ -3,6 +3,9 @@ import numpy as np
 
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.preprocessing import StandardScaler, FunctionTransformer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn.pipeline import Pipeline
 
 class PCA_class:
     def __init__(self, df, scaler_combo, pca_type_combo, output_text, slider, kernel_combo, gamma, degree, coef):
@@ -24,15 +27,32 @@ class PCA_class:
         try:
             pca_type = self.pca_type_combo.get()
             if pca_type == "PCA":
-                if self.scaler_combo.get() == "Standard Scaler":
-                    scaling = StandardScaler()
-                elif self.scaler_combo.get() == "Logarithmic Scaler":
-                    scaling = FunctionTransformer(np.log10, validate=True)
+                if self.scaler_combo.get() == "Logarithmic Scaler":
+                    # add small shift if there is 0 otherwise log blows up
+                    if (self.df <= 0).any().any():
+                        preprocess = Pipeline([
+                            ("shift", FunctionTransformer(lambda X: X + 1e-10, validate=False)),
+                            ("log10", FunctionTransformer(np.log10,  validate=False))])
+                    else:
+                        preprocess = FunctionTransformer(np.log10, validate=False)
+                    self.Scaled_data = preprocess.fit_transform(self.df)
+
+                elif self.scaler_combo.get() == "Logarithmic Scaler + Standard Scaler":
+                    # add small shift if there is 0 otherwise log blows up
+                    if (self.df <= 0).any().any():
+                        preprocess = Pipeline([
+                            ("shift", FunctionTransformer(lambda X: X + 1e-10, validate=False)),
+                            ("log10", FunctionTransformer(np.log10,  validate=False)),
+                            ("scale", StandardScaler())])
+                    else:
+                        preprocess = Pipeline([
+                            ("log10",  FunctionTransformer(np.log10, validate=False)),
+                            ("scale",  StandardScaler())])
+                    self.Scaled_data = preprocess.fit_transform(self.df)
+
                 else:
-                    raise ValueError("Invalid scaler selected")
-                
-                scaling.fit(self.df)
-                self.Scaled_data = scaling.transform(self.df)
+                    scaling = StandardScaler()
+                    self.Scaled_data = scaling.fit_transform(self.df)
                 
                 self.pca = PCA(n_components=int(self.slider.get()))
                 self.pca.fit(self.Scaled_data)
@@ -41,15 +61,32 @@ class PCA_class:
             elif pca_type == "Kernel PCA":
                 kernel_type = self.kernel_combo.get()
                 
-                if self.scaler_combo.get() == "Standard Scaler":
-                    scaling = StandardScaler()
-                elif self.scaler_combo.get() == "Logarithmic Scaler":
-                    scaling = FunctionTransformer(np.log10, validate=True)
+                if self.scaler_combo.get() == "Logarithmic Scaler":
+                    # add small shift if there is 0 otherwise log blows up
+                    if (self.df <= 0).any().any():
+                        preprocess = Pipeline([
+                            ("shift", FunctionTransformer(lambda X: X + 1e-10, validate=False)),
+                            ("log10", FunctionTransformer(np.log10,  validate=False))])
+                    else:
+                        preprocess = FunctionTransformer(np.log10, validate=False)
+                    self.Scaled_data = preprocess.fit_transform(self.df)
+
+                elif self.scaler_combo.get() == "Logarithmic Scaler + Standard Scaler":
+                    # add small shift if there is 0 otherwise log blows up
+                    if (self.df <= 0).any().any():
+                        preprocess = Pipeline([
+                            ("shift", FunctionTransformer(lambda X: X + 1e-10, validate=False)),
+                            ("log10", FunctionTransformer(np.log10,  validate=False)),
+                            ("scale", StandardScaler())])
+                    else:
+                        preprocess = Pipeline([
+                            ("log10",  FunctionTransformer(np.log10, validate=False)),
+                            ("scale",  StandardScaler())])
+                    self.Scaled_data = preprocess.fit_transform(self.df)
+
                 else:
-                    raise ValueError("Invalid scaler selected")
-                
-                scaling.fit(self.df)
-                self.Scaled_data = scaling.transform(self.df)
+                    scaling = StandardScaler()
+                    self.Scaled_data = scaling.fit_transform(self.df)
                 
                 self.pca = KernelPCA(
                     n_components=int(self.slider.get()),
@@ -111,17 +148,27 @@ class PCA_class:
             #    self.output_text.insert("end", f'Principal Component {i}: \n{variance:.2%} of variance\n')
                 
         cumulative_variance = np.cumsum(explained_variance_ratio)
-        # Create a DataFrame for tabular display
-        df = pd.DataFrame({
-            '"Principal Component"': [f'PC{i+1}' for i in range(len(explained_variance_ratio))],
-            '"Explained Variance"': [f"{ev:.2%}" for ev in explained_variance_ratio],
-            '"Cumulative Explained Variance"': [f"{cv:.2%}" for cv in cumulative_variance]
-        })
-        
-        # Convert the DataFrame to a string
-        df_str = df.to_string(index=False)
 
-        # Display the table
-        # Insert the string into the Text widget
-        self.output_text.insert("end", "PCA Explained Variance:\n")
-        self.output_text.insert("end", df_str + "\n")
+        rows = []
+        for i, ev in enumerate(explained_variance_ratio):
+            pc_name = f"PC{i+1}"
+            ev_str  = f"{ev:.2%}"
+            cv_str  = f"{cumulative_variance[i]:.2%}"
+            rows.append((pc_name, ev_str, cv_str))
+
+        header1 = "Principal Component"
+        header2 = "Explained Variance"
+        header3 = "Cumulative Explained Variance"
+
+        col1_w = max(len(header1), *(len(r[0]) for r in rows))
+        col2_w = max(len(header2), *(len(r[1]) for r in rows))
+        col3_w = max(len(header3), *(len(r[2]) for r in rows))
+
+        line_header = (f"{header1:<{col1_w}}  "f"{header2:<{col2_w}}  "f"{header3:<{col3_w}}")
+
+        lines = [line_header]
+        for pc_name, ev_str, cv_str in rows:
+            lines.append(f"{pc_name:<{col1_w}}  "f"{ev_str:<{col2_w}}  "f"{cv_str:<{col3_w}}")
+
+        full_text = "PCA Explained Variance:\n" + "\n".join(lines) + "\n"
+        self.output_text.insert("end", full_text)

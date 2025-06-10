@@ -338,6 +338,14 @@ class MainApp(ctk.CTk):
                 return
             self.sheet_name=selected_sheet
             self.df_0 = pd.read_excel(self.file_path, self.sheet_name)
+            # if 'Zn_ppm' in self.df_0.columns:
+            #     before_count = len(self.df_0)
+            #     self.df_0 = self.df_0[self.df_0['Zn_ppm'] >= 1000]
+            #     after_count = len(self.df_0)
+            #     self.output_text.insert(
+            #         "end",
+            #         f"Filtered zn_ppm < 1000: {before_count - after_count} rows removed, {after_count} remain.\n"
+            #    )
             
             for widget in self.selection_frame.winfo_children():
                 widget.destroy()
@@ -363,7 +371,7 @@ class MainApp(ctk.CTk):
         hdr_canvas = tk.Canvas(popup, height=40, highlightthickness=0,
                             xscrollcommand=xscroll.set)
         hdr_canvas.grid(row=0, column=0, columnspan=4,
-                        sticky="ew", padx=10, pady=(10,0))
+                        sticky="ew", padx=5, pady=(10,0))
         hdr_inner = tk.Frame(hdr_canvas)
         hdr_canvas.create_window((0,0), window=hdr_inner, anchor="nw")
         def _on_hdr_config(e):
@@ -381,13 +389,13 @@ class MainApp(ctk.CTk):
             tree.insert("", "end", iid=str(idx), values=list(row))
 
         #Create & align checkboxes
-        font = tkfont.Font()
+        font = tkfont.Font(font = "TkDefaultFont", size = 11)
         check_vars = {}
         for i, col in enumerate(cols):
             # ellipsize label
             w = tree.column(col)["width"]
             label = col
-            if font.measure(label) > w:
+            if font.measure(label)+3 > w:
                 lo, hi = 0, len(label)
                 while lo < hi:
                     mid = (lo+hi)//2
@@ -395,10 +403,10 @@ class MainApp(ctk.CTk):
                         lo = mid+1
                     else:
                         hi = mid
-                label = label[:lo-1] + "..."
+                label = label[:lo-5] + "..."
             var = tk.BooleanVar(value=False)
             cb  = tk.Checkbutton(hdr_inner, text=label, variable=var)
-            cb.grid(row=0, column=i, sticky="w", padx=(2,0))
+            cb.grid(row=0, column=i, sticky="w", padx=0)
             hdr_inner.grid_columnconfigure(i, minsize=w)
             check_vars[i] = var
 
@@ -516,7 +524,7 @@ class MainApp(ctk.CTk):
             valid_columns = [col for col in self.df_0.columns 
                             if '_ppm' not in col and '_pct' not in col]
 
-        self.scaler_combo = ctk.CTkComboBox(self.selection_frame, values=["Standard Scaler", "Logarithmic Scaler"], state="readonly")
+        self.scaler_combo = ctk.CTkComboBox(self.selection_frame, values=["Standard Scaler", "Logarithmic Scaler", "Logarithmic Scaler + Standard Scaler"], state="readonly")
         self.scaler_combo.set("Standard Scaler")
         self.pca_type_combo = ctk.CTkComboBox(self.selection_frame, values=["PCA", "Kernel PCA"], command=self.kernelstat, state="readonly")
         self.pca_type_combo.set("PCA")
@@ -525,7 +533,7 @@ class MainApp(ctk.CTk):
 
         if valid_columns:
             self.select_data_btn = ctk.CTkButton(self.selection_frame, text="Select Data Columns…", command=self.open_column_selector)
-            self.select_data_btn.grid(row=0, column=0, columnspan=4, pady=(5,0), padx=5)
+            self.select_data_btn.grid(row=0, column=0, columnspan=4, sticky="we", pady=(5,0), padx=5)
             ctk.CTkLabel(self.selection_frame, text="Filter by:").grid(row=1, column=0, columnspan=2, sticky="w", padx=5, pady=(5,0))
             self.selected_column_combobox = ctk.CTkComboBox(self.selection_frame, values=valid_columns, state="readonly", command = self.update_listbox)
             self.selected_column_combobox.grid(row=1, column=2, columnspan=2, sticky="we", padx=5, pady=(5,0))
@@ -784,7 +792,7 @@ class MainApp(ctk.CTk):
             return
         else:
             # self.scaler_label.grid_forget()
-            self.scaler_label = ctk.CTkLabel(self.selection_frame, text= f"Selected scaler: {self.scaler_combo.get()}", font=("Arial", 12))
+            self.scaler_label = ctk.CTkLabel(self.selection_frame, text= f"Selected scaler: {self.scaler_combo.get()}", font=("Arial", 12), wraplength=200)
             self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
    
         self.clear()
