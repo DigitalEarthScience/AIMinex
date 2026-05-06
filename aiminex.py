@@ -37,6 +37,97 @@ from aimgui import color_change
 class MainApp(ctk.CTk):        
     def __init__(self):
         super().__init__()
+        # ---------------------------------------------------------
+        # Cross-platform UI scaling and fonts
+        # ---------------------------------------------------------
+        system_name = platform.system()
+        if system_name == "Windows":
+            scale = 1.25
+            self.default_font_family = "Segoe UI"
+            self.mono_font_family = "Consolas"
+
+        elif system_name == "Darwin":   # macOS
+            scale = 1.15
+            self.default_font_family = "SF Pro Display"
+            self.mono_font_family = "Menlo"
+
+        else:   # Linux
+            scale = 1.20
+            self.default_font_family = "DejaVu Sans"
+            self.mono_font_family = "DejaVu Sans Mono"
+
+        # CustomTkinter scaling
+        ctk.set_widget_scaling(scale)
+        ctk.set_window_scaling(1.0)
+
+        # DPI-aware reusable font sizes
+        self.tk_scaling = float(self.tk.call('tk', 'scaling'))
+
+        self.font_size_small = int(10 * self.tk_scaling)
+        self.font_size_normal = int(12 * self.tk_scaling)
+        self.font_size_large = int(14 * self.tk_scaling)
+
+        # For tab title size
+        self.tab_font_size = 11
+
+        # Global Tk fonts
+        default_font = tkfont.nametofont("TkDefaultFont")
+        default_font.configure(
+            family=self.default_font_family,
+            size=self.font_size_normal
+        )
+
+        text_font = tkfont.nametofont("TkTextFont")
+        text_font.configure(
+            family=self.default_font_family,
+            size=self.font_size_normal
+        )
+
+        fixed_font = tkfont.nametofont("TkFixedFont")
+        fixed_font.configure(
+            family=self.mono_font_family,
+            size=self.font_size_normal
+        )
+        
+        # ttk styling
+        style = ttk.Style()
+
+        style.theme_use("clam")
+
+        # Tabs are entirely taken care of in tab.py
+        # style.configure(
+        #     "TNotebook",
+        #     tabmargins=(2, 6, 2, 0)
+        # )
+
+        # style.configure(
+        #     "TNotebook.Tab",
+        #     font=(self.default_font_family,  self.tab_font_size),
+        #     padding=(16, 8)
+        # )
+
+        # style.map(
+        #     "TNotebook.Tab",
+        #     expand=[("selected", [1, 1, 1, 0])]
+        # )
+
+        style.configure(
+            "Treeview",
+            font=(self.default_font_family, 11),
+            rowheight=40
+        )
+
+        style.configure(
+            "Treeview.Heading",
+            font=(self.default_font_family, 12, "bold")
+        )
+
+        style.configure(
+            "TCombobox",
+            font=(self.default_font_family, 12)
+        )
+        #------------------------------------------------------------
+
         self.title("AIMinex")
         #setting icon        
         if platform.system() == 'Windows':            
@@ -50,16 +141,54 @@ class MainApp(ctk.CTk):
         ctk.set_appearance_mode("System")
         style = ttk.Style()
         style.theme_use("default")
+        # Setting application window
+        # screen_width = self.winfo_screenwidth()
+        # screen_height = self.winfo_screenheight()
+        
+        # self.geometry(f"{screen_width}x{screen_height}")   
+
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
-        
-        self.geometry(f"{screen_width}x{screen_height}")        
+        self.geometry(f"{screen_width}x{screen_height}+0+0")
+
+        # if platform.system() == "Windows":
+        #     self.after(100, lambda: self.state("zoomed"))
+        # else:
+        #     self.geometry(f"{screen_width}x{int(screen_height * 0.92)}+0+0") 
+        #------------------------------------------------------------   
 
         self.filtered_df = pd.DataFrame()
         self.box_frame_sub_visible = True
         self.create_widgets()
         self.data_columns = None
         self.group_column = None
+        # Proper closing
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+    # Closing the App    
+    def on_closing(self):
+        try:
+            # Cancel pending after callbacks
+            for after_id in self.tk.call("after", "info"):
+                try:
+                    self.after_cancel(after_id)
+                except Exception:
+                    pass
+
+            # Close matplotlib figures
+            try:
+                import matplotlib.pyplot as plt
+                plt.close("all")
+            except Exception:
+                pass
+
+            self.quit()
+            self.destroy()
+
+        except Exception:
+            try:
+                self.destroy()
+            except Exception:
+                pass
 
     def toggle_box_frame_sub(self):
         if self.box_frame_sub_visible:
@@ -146,19 +275,20 @@ class MainApp(ctk.CTk):
             wrap="word", 
             bd=0,
             highlightthickness=0,
-            relief="flat"
+            font=(self.mono_font_family, self.font_size_normal)
         )
         self.output_text.pack(fill="both", expand=True)
 
         menubar = Menu(self)
-        self.filemenu = Menu(menubar, tearoff=0)
+        menu_font = (self.default_font_family, self.font_size_normal)
+        self.filemenu = Menu(menubar, tearoff=0, font=menu_font)
 
         # Create file menu options
         self.filemenu.add_command(label="Open File", command=self.load_data)
         self.filemenu.add_command(label="New Tab", command=lambda: self.shared_container.create_tab())
         self.filemenu.entryconfig("New Tab", state=tk.DISABLED)
         
-        self.save_pc_menu = tk.Menu(self.filemenu, tearoff=0)
+        self.save_pc_menu = tk.Menu(self.filemenu, tearoff=0, font=menu_font)
         
         # Create save PC options
         self.save_pc_menu.add_command(label="Save PC by sample excel", command=self.export_pc_by_sample)
@@ -174,7 +304,7 @@ class MainApp(ctk.CTk):
         menubar.add_cascade(label="File", menu=self.filemenu)
         
         #edit menu
-        self.editmenu = Menu(menubar, tearoff=0)
+        self.editmenu = Menu(menubar, tearoff=0, font=menu_font)
         self.editmenu.add_command(label="Edit Data Point Color/Shape", command=lambda: color_change.open_color_window(self), state="disabled")
 
         menubar.add_cascade(label="Edit", menu=self.editmenu)      
@@ -191,7 +321,7 @@ class MainApp(ctk.CTk):
         self.editmenu.add_command(label="Settings", command=self.open_settings)
 
         # Create help menu options
-        helpmenu = Menu(menubar, tearoff=0)
+        helpmenu = Menu(menubar, tearoff=0, font=menu_font)
         helpmenu.add_command(label="User Manual", command=self.open_help_html)
         helpmenu.add_separator()
         helpmenu.add_command(label="Shortcuts:", command=None)
@@ -524,9 +654,29 @@ class MainApp(ctk.CTk):
             valid_columns = [col for col in self.df_0.columns 
                             if '_ppm' not in col and '_pct' not in col]
 
-        self.scaler_combo = ctk.CTkComboBox(self.selection_frame, values=["Standard Scaler", "Logarithmic Scaler", "Logarithmic Scaler + Standard Scaler"], state="readonly")
+        self.scaler_combo = ctk.CTkComboBox(
+            self.selection_frame, 
+            values=[
+                "Standard Scaler",
+                "Logarithmic Scaler",
+                "Logarithmic Scaler + Standard Scaler"
+                ],
+            state="readonly",
+            font=(self.default_font_family, 12),
+            dropdown_font=(self.default_font_family, 12)
+        )
         self.scaler_combo.set("Standard Scaler")
-        self.pca_type_combo = ctk.CTkComboBox(self.selection_frame, values=["PCA", "Kernel PCA"], command=self.kernelstat, state="readonly")
+        self.pca_type_combo = ctk.CTkComboBox(
+            self.selection_frame, 
+            values=[
+                "PCA", 
+                "Kernel PCA"
+                ], 
+            command=self.kernelstat, 
+            state="readonly",
+            font=(self.default_font_family, self.font_size_normal),
+            dropdown_font=(self.default_font_family, self.font_size_normal)
+        )
         self.pca_type_combo.set("PCA")
         self.slider = ctk.CTkSlider(self.selection_frame, from_=1, to=8, number_of_steps=7, command=self.on_slider_change)
         self.slider.set(6)
@@ -535,7 +685,14 @@ class MainApp(ctk.CTk):
             self.select_data_btn = ctk.CTkButton(self.selection_frame, text="Select Data Columns…", command=self.open_column_selector)
             self.select_data_btn.grid(row=0, column=0, columnspan=4, sticky="we", pady=(5,0), padx=5)
             ctk.CTkLabel(self.selection_frame, text="Filter by:").grid(row=1, column=0, columnspan=2, sticky="w", padx=5, pady=(5,0))
-            self.selected_column_combobox = ctk.CTkComboBox(self.selection_frame, values=valid_columns, state="readonly", command = self.update_listbox)
+            self.selected_column_combobox = ctk.CTkComboBox(
+                self.selection_frame, 
+                values=valid_columns, 
+                state="readonly",
+                font=(self.default_font_family, self.font_size_normal),
+                dropdown_font=(self.default_font_family, self.font_size_normal),
+                command = self.update_listbox
+            )
             self.selected_column_combobox.grid(row=1, column=2, columnspan=2, sticky="we", padx=5, pady=(5,0))
             self.selected_column_combobox.set(valid_columns[0])
 
@@ -550,9 +707,15 @@ class MainApp(ctk.CTk):
 
         # if self.selected_column == "None(include ALL)":
         #     self.create_buttons()
+        listbox_font_size = int(12 * self.tk.call('tk', 'scaling'))
         if self.selected_column:
             self.df_0[self.selected_column] = self.df_0[self.selected_column].apply(lambda x: x.strip().lower().title() if isinstance(x, str) and pd.notnull(x) else x)
-            self.lithology_listbox = tk.Listbox(self.selection_frame, selectmode=tk.MULTIPLE)
+            self.lithology_listbox = tk.Listbox(
+                self.selection_frame, 
+                selectmode=tk.MULTIPLE,
+                font=(self.default_font_family, listbox_font_size),
+                height=10
+            )            
             self.lithologies = self.df_0[self.selected_column].unique()
 
             for lithology in self.lithologies:
@@ -753,128 +916,315 @@ class MainApp(ctk.CTk):
         for widget in self.legend_frame.winfo_children():
             widget.destroy()
 
-    def filter_dataframe(self):   
-        # delete previous labels
-        if hasattr(self, 'scaler_label') and self.scaler_label is not None:
-            self.scaler_label.destroy()
-            del self.scaler_label
+    # def filter_dataframe(self):   
+    #     # delete previous labels
+    #     if hasattr(self, 'scaler_label') and self.scaler_label is not None:
+    #         self.scaler_label.destroy()
+    #         del self.scaler_label
             
-        if hasattr(self, 'pca_label') and self.pca_label is not None:
-            self.pca_label.destroy()
-            del self.pca_label
+    #     if hasattr(self, 'pca_label') and self.pca_label is not None:
+    #         self.pca_label.destroy()
+    #         del self.pca_label
 
-        if hasattr(self, 'color_window') and self.color_window.winfo_exists():
+    #     if hasattr(self, 'color_window') and self.color_window.winfo_exists():
+    #         self.color_window.destroy()
+
+    #     if hasattr(self, 'lithologies_label') and self.lithologies_label is not None:
+    #         self.lithologies_label.destroy()
+    #         del self.lithologies_label
+
+    #     #set PCA/Kernel PCA parameters
+    #     if self.pca_type_combo.get() == "PCA":
+    #         self.pca_label = ctk.CTkLabel(self.selection_frame, text="PCA", font=("Arial", 12))
+            
+    #     if self.pca_type_combo.get() == "Kernel PCA":
+    #         if self.kernel == "rbf":
+    #             self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f})", font=("Arial", 12))  
+    #         elif self.kernel == "poly":
+    #             self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.degree:.1f}, {self.coef:.1f})", font=("Arial", 12))  
+    #         elif self.kernel == "rbf":
+    #             self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.coef:.1f})", font=("Arial", 12))  
+    #         else:
+    #             self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel}", font=("Arial", 12)) 
+                
+    #     self.pca_label.grid(row=14, column=0, columnspan=4, pady=(0,5))
+            
+    #     if self.scaler_combo.get() == "Select PCA Scaler:":
+    #         self.scaler_label = ctk.CTkLabel(self.selection_frame, text="Select a Scaler", font=("Arial", 12))
+    #         self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
+    #         return
+    #     else:
+    #         # self.scaler_label.grid_forget()
+    #         self.scaler_label = ctk.CTkLabel(self.selection_frame, text= f"Selected scaler: {self.scaler_combo.get()}", font=("Arial", 12), wraplength=200)
+    #         self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
+   
+    #     self.clear()
+    #     self.current_button = None
+
+    #     #Filter/process dataframe based on selected lithology and parameters
+    #     try:
+    #         # Find selected lithologies(unique groups) and add check mark to them
+    #         selected_indices = self.lithology_listbox.curselection()
+
+    #         select_lithologies = [self.lithology_listbox.get(i) for i in selected_indices]
+    #         selected_lithologies = [item.replace('✔️ ', '').strip() for item in select_lithologies]
+
+    #         print(f"Selected column: {self.selected_column}")
+    #         print(f"Selected rows: {selected_lithologies} (Type: {type(selected_lithologies[0]) if selected_lithologies else 'Empty'})")
+
+    #         self.df_0[self.selected_column] = self.df_0[self.selected_column].astype(str).str.strip()
+
+    #         print(f"Original DataFrame values in column {self.selected_column}: {self.df_0[self.selected_column].unique()}")
+
+    #         # Create filtered DataFrame using the selected lithologies
+    #         self.filtered_df = self.df_0[self.df_0[self.selected_column].isin(selected_lithologies)]
+
+    #         item = None
+    #         self.lithology_listbox.delete(0, tk.END)
+    #         self.selected_items = {lithology: (lithology in selected_lithologies) for lithology in self.lithologies}
+        
+    #         for lithology, selected in self.selected_items.items():
+    #             if selected:
+    #                 item = "✔️ " + lithology
+    #             else:
+    #                 item = lithology
+    #             self.lithology_listbox.insert(tk.END, item)
+    
+    #         def deselect_all():
+    #             self.lithology_listbox.selection_clear(0, tk.END)
+    
+    #         self.lithology_listbox.bind('<Command-d>', lambda event: deselect_all())
+    #         self.lithology_listbox.bind('<Control-d>', lambda event: deselect_all())
+
+    #         if not selected_indices:
+    #             self.lithologies_label = ctk.CTkLabel(self.selection_frame, text="No lithology selected:(", font=("Arial", 12))
+    #             self.lithologies_label.grid(row=15, column=0, columnspan=4, padx=5, pady=(0,5))                   
+    #     except:
+    #         self.filtered_df = self.df_0
+
+    #     # Cleaning Data Frame to contain only the data/elements
+    #     filtered_columns = self.data_columns
+    #     # filtered_columns = self.data_columns if self.data_columns is not None else [
+    #     #     col for col in self.filtered_df.columns if '_ppm' in col or '_pct' in col
+    #     # ]
+
+    #     df_filtered = self.filtered_df.replace('<', '', regex=True)
+    #     df_filtered[filtered_columns] = df_filtered[filtered_columns].apply(pd.to_numeric, errors='coerce')
+    #     self.cleaned_df = df_filtered.dropna(subset=filtered_columns)
+        
+    #     df_filtered = self.cleaned_df[filtered_columns]
+
+    #     self.cleaned_df.columns = self.cleaned_df.columns.str.strip().str.lower()
+
+    #     self.df = df_filtered
+
+    #     # Creating data frame with Rare Earth Elements
+    #     self.df_c = self.df.copy()
+    #     self.df_c.columns = self.df_c.columns.str.replace('_ppm', '').str.replace('_pct', '').str.replace('_Howell', '')
+        
+    #     LREE_elements = ['La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd']
+    #     HREE_elements = ['Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu']
+        
+    #     LREE_elements_in_df = [element for element in LREE_elements if element in self.df_c.columns]
+    #     HREE_elements_in_df = [element for element in HREE_elements if element in self.df_c.columns]
+        
+    #     if LREE_elements_in_df:
+    #         self.df_c['LREE'] = self.df_c[LREE_elements_in_df].sum(axis=1)
+        
+    #     if HREE_elements_in_df:
+    #         self.df_c['HREE'] = self.df_c[HREE_elements_in_df].sum(axis=1)
+        
+    #     if LREE_elements_in_df or HREE_elements_in_df:
+    #         self.df_c['REE'] = self.df_c[LREE_elements_in_df + HREE_elements_in_df].sum(axis=1)
+
+    #     self.output_text.insert("end", f"Filtered & Cleaned df:\n{self.df.shape}\n")
+    #     self.perform_pca()
+
+    def filter_dataframe(self):
+        # delete previous labels
+        for attr in ["scaler_label", "pca_label", "lithologies_label"]:
+            if hasattr(self, attr) and getattr(self, attr) is not None:
+                try:
+                    getattr(self, attr).destroy()
+                except Exception:
+                    pass
+                delattr(self, attr)
+
+        if hasattr(self, "color_window") and self.color_window.winfo_exists():
             self.color_window.destroy()
 
-        if hasattr(self, 'lithologies_label') and self.lithologies_label is not None:
-            self.lithologies_label.destroy()
-            del self.lithologies_label
-
-        #set PCA/Kernel PCA parameters
+        # set PCA/Kernel PCA label
         if self.pca_type_combo.get() == "PCA":
-            self.pca_label = ctk.CTkLabel(self.selection_frame, text="PCA", font=("Arial", 12))
-            
-        if self.pca_type_combo.get() == "Kernel PCA":
-            if self.kernel == "rbf":
-                self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f})", font=("Arial", 12))  
-            elif self.kernel == "poly":
-                self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.degree:.1f}, {self.coef:.1f})", font=("Arial", 12))  
-            elif self.kernel == "rbf":
-                self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.coef:.1f})", font=("Arial", 12))  
-            else:
-                self.pca_label = ctk.CTkLabel(self.selection_frame, text= f"Kernel PCA-{self.kernel}", font=("Arial", 12)) 
-                
-        self.pca_label.grid(row=14, column=0, columnspan=4, pady=(0,5))
-            
-        if self.scaler_combo.get() == "Select PCA Scaler:":
-            self.scaler_label = ctk.CTkLabel(self.selection_frame, text="Select a Scaler", font=("Arial", 12))
-            self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
-            return
+            self.pca_label = ctk.CTkLabel(
+                self.selection_frame, text="PCA", font=("Arial", 12)
+            )
         else:
-            # self.scaler_label.grid_forget()
-            self.scaler_label = ctk.CTkLabel(self.selection_frame, text= f"Selected scaler: {self.scaler_combo.get()}", font=("Arial", 12), wraplength=200)
-            self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
-   
+            if self.kernel == "rbf":
+                text = f"Kernel PCA-{self.kernel} ({self.gamma:.2f})"
+            elif self.kernel == "poly":
+                text = f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.degree:.1f}, {self.coef:.1f})"
+            elif self.kernel == "sigmoid":
+                text = f"Kernel PCA-{self.kernel} ({self.gamma:.2f}, {self.coef:.1f})"
+            else:
+                text = f"Kernel PCA-{self.kernel}"
+
+            self.pca_label = ctk.CTkLabel(
+                self.selection_frame, text=text, font=("Arial", 12)
+            )
+
+        self.pca_label.grid(row=14, column=0, columnspan=4, pady=(0, 5))
+
+        # scaler label
+        self.scaler_label = ctk.CTkLabel(
+            self.selection_frame,
+            text=f"Selected scaler: {self.scaler_combo.get()}",
+            font=("Arial", 12),
+            wraplength=200,
+        )
+        self.scaler_label.grid(row=13, column=0, columnspan=4, padx=5, pady=0)
+
         self.clear()
         self.current_button = None
 
-        #Filter/process dataframe based on selected lithology and parameters
         try:
-            # Find selected lithologies(unique groups) and add check mark to them
+            # selected groups/lithologies
             selected_indices = self.lithology_listbox.curselection()
-
             select_lithologies = [self.lithology_listbox.get(i) for i in selected_indices]
-            selected_lithologies = [item.replace('✔️ ', '').strip() for item in select_lithologies]
+            selected_lithologies = [
+                item.replace("✔️ ", "").strip()
+                for item in select_lithologies
+            ]
 
             print(f"Selected column: {self.selected_column}")
-            print(f"Selected rows: {selected_lithologies} (Type: {type(selected_lithologies[0]) if selected_lithologies else 'Empty'})")
+            print(f"Selected lithologies: {selected_lithologies}")
 
-            self.df_0[self.selected_column] = self.df_0[self.selected_column].astype(str).str.strip()
+            # normalize selected column for comparison
+            self.df_0[self.selected_column] = (
+                self.df_0[self.selected_column]
+                .astype(str)
+                .str.strip()
+            )
 
-            print(f"Original DataFrame values in column {self.selected_column}: {self.df_0[self.selected_column].unique()}")
+            # If no group selected, use all rows
+            if selected_lithologies:
+                self.filtered_df = self.df_0[
+                    self.df_0[self.selected_column].isin(selected_lithologies)
+                ].copy()
+            else:
+                self.filtered_df = self.df_0.copy()
+                self.output_text.insert("end", "No group selected: using all rows.\n")
 
-            # Create filtered DataFrame using the selected lithologies
-            self.filtered_df = self.df_0[self.df_0[self.selected_column].isin(selected_lithologies)]
-
-            item = None
+            # refresh listbox with check marks
             self.lithology_listbox.delete(0, tk.END)
-            self.selected_items = {lithology: (lithology in selected_lithologies) for lithology in self.lithologies}
-        
+
+            self.selected_items = {
+                lithology: lithology in selected_lithologies
+                for lithology in self.lithologies
+            }
+
             for lithology, selected in self.selected_items.items():
-                if selected:
-                    item = "✔️ " + lithology
-                else:
-                    item = lithology
+                item = "✔️ " + lithology if selected else lithology
                 self.lithology_listbox.insert(tk.END, item)
-    
-            def deselect_all():
-                self.lithology_listbox.selection_clear(0, tk.END)
-    
-            self.lithology_listbox.bind('<Command-d>', lambda event: deselect_all())
-            self.lithology_listbox.bind('<Control-d>', lambda event: deselect_all())
 
-            if not selected_indices:
-                self.lithologies_label = ctk.CTkLabel(self.selection_frame, text="No lithology selected:(", font=("Arial", 12))
-                self.lithologies_label.grid(row=15, column=0, columnspan=4, padx=5, pady=(0,5))                   
-        except:
-            self.filtered_df = self.df_0
+            if not selected_lithologies:
+                self.lithologies_label = ctk.CTkLabel(
+                    self.selection_frame,
+                    text="No lithology selected: using all rows",
+                    font=("Arial", 12),
+                )
+                self.lithologies_label.grid(
+                    row=15, column=0, columnspan=4, padx=5, pady=(0, 5)
+                )
 
-        # Cleaning Data Frame to contain only the data/elements
-        filtered_columns = self.data_columns
-        # filtered_columns = self.data_columns if self.data_columns is not None else [
-        #     col for col in self.filtered_df.columns if '_ppm' in col or '_pct' in col
-        # ]
+        except Exception as e:
+            print("Filtering by group failed:", e)
+            self.filtered_df = self.df_0.copy()
+            selected_lithologies = []
 
-        df_filtered = self.filtered_df.replace('<', '', regex=True)
-        df_filtered[filtered_columns] = df_filtered[filtered_columns].apply(pd.to_numeric, errors='coerce')
-        self.cleaned_df = df_filtered.dropna(subset=filtered_columns)
-        
-        df_filtered = self.cleaned_df[filtered_columns]
+        # -------------------------------
+        # Clean dataframe for PCA
+        # -------------------------------
 
+        if self.data_columns is None:
+            self.output_text.insert("end", "No data columns selected.\n")
+            return
+
+        # Keep only geochemistry numeric columns
+        filtered_columns = [
+            col for col in self.data_columns
+            if "_ppm" in str(col).lower() or "_pct" in str(col).lower()
+        ]
+
+        if not filtered_columns:
+            self.output_text.insert(
+                "end",
+                "No ppm/pct numeric columns selected for PCA.\n"
+            )
+            return
+
+        df_filtered = self.filtered_df.copy()
+
+        # Clean values such as <0.01 and commas
+        df_filtered[filtered_columns] = (
+            df_filtered[filtered_columns]
+            .replace(r"^\s*<\s*", "", regex=True)
+            .replace(r",", "", regex=True)
+            .apply(pd.to_numeric, errors="coerce")
+        )
+
+        print("Rows before filter:", len(self.df_0))
+        print("Rows after group filter:", len(self.filtered_df))
+        print("Filtered columns:", filtered_columns)
+
+        # Drop rows missing any selected PCA variable
+        self.cleaned_df = df_filtered.dropna(subset=filtered_columns).copy()
+
+        if self.cleaned_df.empty:
+            self.output_text.insert(
+                "end",
+                "No rows left after cleaning. Try selecting fewer elements or check missing values.\n"
+            )
+            return
+
+        self.df = self.cleaned_df[filtered_columns].copy()
+
+        # Lowercase metadata columns after PCA dataframe is created
         self.cleaned_df.columns = self.cleaned_df.columns.str.strip().str.lower()
 
-        self.df = df_filtered
-
-        # Creating data frame with Rare Earth Elements
+        # Creating dataframe with Rare Earth Elements
         self.df_c = self.df.copy()
-        self.df_c.columns = self.df_c.columns.str.replace('_ppm', '').str.replace('_pct', '').str.replace('_Howell', '')
-        
-        LREE_elements = ['La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd']
-        HREE_elements = ['Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu']
-        
-        LREE_elements_in_df = [element for element in LREE_elements if element in self.df_c.columns]
-        HREE_elements_in_df = [element for element in HREE_elements if element in self.df_c.columns]
-        
+        self.df_c.columns = (
+            self.df_c.columns
+            .str.replace("_ppm", "", regex=False)
+            .str.replace("_pct", "", regex=False)
+            .str.replace("_Howell", "", regex=False)
+        )
+
+        LREE_elements = ["La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd"]
+        HREE_elements = ["Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"]
+
+        LREE_elements_in_df = [
+            element for element in LREE_elements
+            if element in self.df_c.columns
+        ]
+        HREE_elements_in_df = [
+            element for element in HREE_elements
+            if element in self.df_c.columns
+        ]
+
         if LREE_elements_in_df:
-            self.df_c['LREE'] = self.df_c[LREE_elements_in_df].sum(axis=1)
-        
+            self.df_c["LREE"] = self.df_c[LREE_elements_in_df].sum(axis=1)
+
         if HREE_elements_in_df:
-            self.df_c['HREE'] = self.df_c[HREE_elements_in_df].sum(axis=1)
-        
+            self.df_c["HREE"] = self.df_c[HREE_elements_in_df].sum(axis=1)
+
         if LREE_elements_in_df or HREE_elements_in_df:
-            self.df_c['REE'] = self.df_c[LREE_elements_in_df + HREE_elements_in_df].sum(axis=1)
+            self.df_c["REE"] = self.df_c[
+                LREE_elements_in_df + HREE_elements_in_df
+            ].sum(axis=1)
 
         self.output_text.insert("end", f"Filtered & Cleaned df:\n{self.df.shape}\n")
+
         self.perform_pca()
         
     def perform_pca(self):
@@ -904,8 +1254,44 @@ class MainApp(ctk.CTk):
         self.supervised_list = ctk.CTkLabel(self.box_frame, text="Supervised Learning")
         self.supervised_list.grid(row=4, column=0, columnspan=6, sticky="w", pady=(5,0), padx=5)
 
+    # def loading(self):
+    #     # Create loadings
+    #     self.pca = self.pca_instance.pca
+
+    #     if isinstance(self.pca, PCA):
+    #         components = self.pca.components_
+
+    #         self.loadings = pd.DataFrame(
+    #             components.T,
+    #             columns=['PC' + str(i) for i in range(1, components.shape[0] + 1)],
+    #             index=self.df.columns
+    #         )
+
+    #     elif isinstance(self.pca, KernelPCA):
+    #         # KernelPCA does not provide direct loadings like PCA
+    #         Scaled_data = self.pca_instance.Scaled_data
+    #         K = self.pca._get_kernel(Scaled_data, self.pca.X_fit_)  # Compute the kernel matrix
+            
+    #         # Use the eigenvectors to approximate loadings
+    #         eigenvectors = self.pca.eigenvectors_
+    #         loadings_approx = np.dot(K.T, eigenvectors)
+
+    #         # Reshape to ensure the shape matches with the original features
+    #         loadings_approx = loadings_approx.T
+            
+    #         # Compute the final loadings by taking the dot product with the original data
+    #         loadings_final = np.dot(Scaled_data.T, loadings_approx.T)
+
+    #         self.loadings = pd.DataFrame(
+    #             loadings_final,
+    #             columns=['PC' + str(i) for i in range(1, eigenvectors.shape[1] + 1)],
+    #             index=self.df.columns
+    #         )
+
+    #     else:
+    #         raise ValueError("self.pca must be an instance of PCA or KernelPCA")
+
     def loading(self):
-        # Create loadings
         self.pca = self.pca_instance.pca
 
         if isinstance(self.pca, PCA):
@@ -913,30 +1299,32 @@ class MainApp(ctk.CTk):
 
             self.loadings = pd.DataFrame(
                 components.T,
-                columns=['PC' + str(i) for i in range(1, components.shape[0] + 1)],
+                columns=[f"PC{i}" for i in range(1, components.shape[0] + 1)],
                 index=self.df.columns
             )
+            #HNG
+            # Add aliases: 0 -> PC1, 1 -> PC2, etc.
+            for i, col in enumerate(list(self.loadings.columns)):
+                self.loadings[i] = self.loadings[col]
 
         elif isinstance(self.pca, KernelPCA):
-            # KernelPCA does not provide direct loadings like PCA
             Scaled_data = self.pca_instance.Scaled_data
-            K = self.pca._get_kernel(Scaled_data, self.pca.X_fit_)  # Compute the kernel matrix
-            
-            # Use the eigenvectors to approximate loadings
+            K = self.pca._get_kernel(Scaled_data, self.pca.X_fit_)
+
             eigenvectors = self.pca.eigenvectors_
             loadings_approx = np.dot(K.T, eigenvectors)
-
-            # Reshape to ensure the shape matches with the original features
             loadings_approx = loadings_approx.T
-            
-            # Compute the final loadings by taking the dot product with the original data
             loadings_final = np.dot(Scaled_data.T, loadings_approx.T)
 
             self.loadings = pd.DataFrame(
                 loadings_final,
-                columns=['PC' + str(i) for i in range(1, eigenvectors.shape[1] + 1)],
+                columns=[f"PC{i}" for i in range(1, eigenvectors.shape[1] + 1)],
                 index=self.df.columns
             )
+            #HNG
+            # Add aliases: 0 -> PC1, 1 -> PC2, etc.
+            for i, col in enumerate(list(self.loadings.columns)):
+                self.loadings[i] = self.loadings[col]
 
         else:
             raise ValueError("self.pca must be an instance of PCA or KernelPCA")

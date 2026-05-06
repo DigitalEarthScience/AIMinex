@@ -340,8 +340,24 @@ class class2d:
 
         palette = list(color_change.color_map.values())
         
-        sns.boxplot(x=xdata_filtered, y=filtered_df[self.selected_column.lower()], ax=ax_box_x, palette=palette, orient='h')
-        sns.boxplot(y=ydata_filtered, x=filtered_df[self.selected_column.lower()], ax=ax_box_y, palette=palette, orient='v')
+        sns.boxplot(
+            x=xdata_filtered, 
+            y=filtered_df[self.selected_column.lower()], 
+            hue=filtered_df[self.selected_column.lower()],
+            ax=ax_box_x, 
+            palette=palette, 
+            orient='h',
+            legend=False
+        )
+        sns.boxplot(
+            y=ydata_filtered, 
+            x=filtered_df[self.selected_column.lower()], 
+            hue=filtered_df[self.selected_column.lower()],
+            ax=ax_box_y, 
+            palette=palette, 
+            orient='v',
+            legend=False
+        )
 
         # Customize tick parameters for the box plots
         ax_box_x.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
@@ -408,13 +424,13 @@ class class2d:
         
         for i, name in enumerate(self.df.columns):
             ip = self.df.columns.get_loc(name)
-            arrow_2d = self.ax.quiver(self.x_arr[ip], self.y_arr[ip], self.xs[ip], self.ys[ip], color='r', scale=arrow_scale, width=0.002)
+            arrow_2d = self.ax.quiver(self.x_arr[ip], self.y_arr[ip], self.xs.iloc[ip], self.ys.iloc[ip], color='r', scale=arrow_scale, width=0.002)
             self.arrow_list_2d.append(arrow_2d)
         
         namelist_2d = []
         for i, names in enumerate(show_names):
             ip = indx[i]
-            n = self.ax.text((1 / arrow_scale) * self.xs[ip], (1 / arrow_scale) * self.ys[ip], names, fontsize='small', ha='center', va='center')
+            n = self.ax.text((1 / arrow_scale) * self.xs.iloc[ip], (1 / arrow_scale) * self.ys.iloc[ip], names, fontsize='small', ha='center', va='center')
             namelist_2d.append(n)
 
         selected_indices = self.multiselect_2d.curselection()
@@ -466,7 +482,7 @@ class class2d:
         self.arrow_list_2d.clear()
         for i, name in enumerate(self.df.columns):
             ip = self.df.columns.get_loc(name)
-            arrow_2d = self.ax.quiver(self.x_arr[ip], self.y_arr[ip], self.xs[ip], self.ys[ip], color='r', scale=arrow_scale, width=0.002)
+            arrow_2d = self.ax.quiver(self.x_arr[ip], self.y_arr[ip], self.xs.iloc[ip], self.ys.iloc[ip], color='r', scale=arrow_scale, width=0.002)
             arrow_2d.set_visible(arrow_visibility[i])
             self.arrow_list_2d.append(arrow_2d)
     
