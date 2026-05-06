@@ -13,7 +13,17 @@ class SharedContainer:
         self.tab_count = 0
 
         # Add a plus button for creating new tabs
-        self.plus_button = ctk.CTkButton(self.tab_container, text="+", width=25, height=25, border_width=0, hover_color="darkgrey", text_color="black", fg_color="transparent", command=self.create_tab_button)
+        self.plus_button = ctk.CTkButton(
+            self.tab_container, 
+            text="+", 
+            width=25, 
+            height=25, 
+            border_width=0, 
+            hover_color="darkgrey", 
+            text_color="black", 
+            fg_color="transparent", 
+            command=self.create_tab_button
+        )
         #self.plus_button.pack(side=tk.RIGHT, padx=3, pady=3)
 
     def create_tab(self, title="New Tab"):
@@ -35,7 +45,17 @@ class SharedContainer:
 )
         tab_label.bind("<Double-1>", lambda event: self.edit_tab_label(tab_label))
         custom_font = ctk.CTkFont(size=12)
-        close_button = ctk.CTkButton(tab_frame, text="x", width=28, height=32, border_width=0, font=custom_font, hover_color="darkgrey", text_color="black", command=lambda: self.close_tab(tab_frame, content_frame))
+        close_button = ctk.CTkButton(
+            tab_frame, 
+            text="x", 
+            width=28, 
+            height=32, 
+            border_width=0, 
+            font=custom_font, 
+            hover_color="darkgrey", 
+            text_color="black", 
+            command=lambda: self.close_tab(tab_frame, content_frame)
+        )
         
         close_button.pack(side=tk.RIGHT, padx=3, pady=3) #, fill=tk.Y)
         tab_label.pack(side=tk.LEFT, padx=3, pady=3) #, fill=tk.Y)

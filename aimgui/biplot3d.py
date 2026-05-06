@@ -260,7 +260,12 @@ class class3d:
                     text = f"{description.iloc[index]}"
                 else:
                     index = ind
-                    x, y, _ = proj3d.proj_transform(self.pca_df_scaled.iloc[index][pc1], self.pca_df_scaled.iloc[index][pc2], self.pca_df_scaled.iloc[index][pc3], self.ax.get_proj())
+                    x, y, _ = proj3d.proj_transform(
+                        self.pca_df_scaled.iloc[index][pc1], 
+                        self.pca_df_scaled.iloc[index][pc2], 
+                        self.pca_df_scaled.iloc[index][pc3], 
+                        self.ax.get_proj()
+                    )
                     pos = (x, y)
                     text = f"{description.iloc[index]}"
 
@@ -308,7 +313,12 @@ class class3d:
             def update_annotations(event):
                 for index, annot in self.annotations.items():
                     if index in self.selected_points:
-                        x, y, _ = proj3d.proj_transform(self.pca_df_scaled.iloc[index][pc1], self.pca_df_scaled.iloc[index][pc2], self.pca_df_scaled.iloc[index][pc3], self.ax.get_proj())
+                        x, y, _ = proj3d.proj_transform(
+                            self.pca_df_scaled.iloc[index][pc1], 
+                            self.pca_df_scaled.iloc[index][pc2], 
+                            self.pca_df_scaled.iloc[index][pc3], 
+                            self.ax.get_proj()
+                        )
                         annot.xy = (x, y)
                 fig.canvas.draw_idle()
             

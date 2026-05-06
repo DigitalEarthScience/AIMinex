@@ -300,7 +300,8 @@ class MainApp(ctk.CTk):
         self.filemenu.add_cascade(label="Save PC", menu=self.save_pc_menu)
         
         self.filemenu.add_separator()
-        self.filemenu.add_command(label="Exit", command=self.destroy)
+        #self.filemenu.add_command(label="Exit", command=self.destroy)
+        self.filemenu.add_command(label="Exit", command=self.on_closing)
         menubar.add_cascade(label="File", menu=self.filemenu)
         
         #edit menu
@@ -389,13 +390,31 @@ class MainApp(ctk.CTk):
         appearance_mode_var = tk.StringVar(value=self.current_appearance_mode)  # Set initial value
 
         # Create Radio Buttons with the correct checked state
-        appearance_mode_system = ctk.CTkRadioButton(settings_popup, text="System", variable=appearance_mode_var, value="system", command=lambda: self.change_appearance_mode("system"))
+        appearance_mode_system = ctk.CTkRadioButton(
+            settings_popup, 
+            text="System", 
+            variable=appearance_mode_var, 
+            value="system", 
+            command=lambda: self.change_appearance_mode("system")
+        )
         appearance_mode_system.pack(pady=5)
 
-        appearance_mode_light = ctk.CTkRadioButton(settings_popup, text="Light", variable=appearance_mode_var, value="light", command=lambda: self.change_appearance_mode("light"))
+        appearance_mode_light = ctk.CTkRadioButton(
+            settings_popup, 
+            text="Light", 
+            variable=appearance_mode_var, 
+            value="light", 
+            command=lambda: self.change_appearance_mode("light")
+        )
         appearance_mode_light.pack(pady=5)
 
-        appearance_mode_dark = ctk.CTkRadioButton(settings_popup, text="Dark", variable=appearance_mode_var, value="dark", command=lambda: self.change_appearance_mode("dark"))
+        appearance_mode_dark = ctk.CTkRadioButton(
+            settings_popup, 
+            text="Dark", 
+            variable=appearance_mode_var, 
+            value="dark", 
+            command=lambda: self.change_appearance_mode("dark")
+        )
         appearance_mode_dark.pack(pady=5)
 
         # Add Color Theme options
@@ -405,13 +424,29 @@ class MainApp(ctk.CTk):
         color_theme_var = tk.StringVar(value=self.current_color_theme)  # Set initial value
 
         # Create Radio Buttons with the correct checked state
-        color_theme_blue = ctk.CTkRadioButton(settings_popup, text="Blue", variable=color_theme_var, value="blue", command=lambda: self.change_color_theme("blue"))
+        color_theme_blue = ctk.CTkRadioButton(
+            settings_popup, 
+            text="Blue", 
+            variable=color_theme_var, 
+            value="blue", command=lambda: self.change_color_theme("blue")
+        )
         color_theme_blue.pack(pady=5)
 
-        color_theme_dark_blue = ctk.CTkRadioButton(settings_popup, text="Dark Blue", variable=color_theme_var, value="dark-blue", command=lambda: self.change_color_theme("dark-blue"))
+        color_theme_dark_blue = ctk.CTkRadioButton(
+            settings_popup, 
+            text="Dark Blue", 
+            variable=color_theme_var, 
+            value="dark-blue", 
+            command=lambda: self.change_color_theme("dark-blue")
+        )
         color_theme_dark_blue.pack(pady=5)
 
-        color_theme_green = ctk.CTkRadioButton(settings_popup, text="Green", variable=color_theme_var, value="green", command=lambda: self.change_color_theme("green"))
+        color_theme_green = ctk.CTkRadioButton(
+            settings_popup, 
+            text="Green", 
+            variable=color_theme_var, 
+            value="green", command=lambda: self.change_color_theme("green")
+        )
         color_theme_green.pack(pady=5)
 
         # Close Button
@@ -795,7 +830,11 @@ class MainApp(ctk.CTk):
         self.label3.configure(text=f"Coef: {self.coef:.2f}")
         
         # kernel combobox
-        self.kernel_combo = ctk.CTkComboBox(self.selection_frame, values=["linear", "poly", "rbf", "sigmoid", "cosine"], command=self.kernel_param, state="readonly")
+        self.kernel_combo = ctk.CTkComboBox(
+            self.selection_frame, 
+            values=["linear", "poly", "rbf", "sigmoid", "cosine"], 
+            command=self.kernel_param, state="readonly"
+        )
         self.kernel_text = ctk.CTkLabel(self.selection_frame, text="Kernel:")
         self.kernel_combo.set("linear")
 
@@ -1230,7 +1269,17 @@ class MainApp(ctk.CTk):
     def perform_pca(self):
         # Perform PCA and update output
         try:
-            self.pca_instance = PCA_class(self.df, self.scaler_combo, self.pca_type_combo, self.output_text, self.slider, self.kernel_combo, self.gamma, self.degree, self.coef)
+            self.pca_instance = PCA_class(
+                self.df, 
+                self.scaler_combo, 
+                self.pca_type_combo, 
+                self.output_text, 
+                self.slider, 
+                self.kernel_combo, 
+                self.gamma, 
+                self.degree, 
+                self.coef
+            )
             self.pca_instance.get_variance_ratio()
             self.output_text.insert("end", f"PCA performed successfully. Shape of transformed data: {self.pca_instance.x.shape}\n")
             color_change.color_function(self)
@@ -1332,17 +1381,61 @@ class MainApp(ctk.CTk):
     def selection(self):
         # Create a combo box for selecting clustering methods and initiate the modules
         self.cluster_combo = ctk.CTkComboBox(
-            self.box_frame, values=["K-mean", "Hierarchical", "DBSCAN", "Mean Shift", "Spectral", "GMM", "Affinity Propagation", "BIRCH"], width=100, height=20, command=self.update_cluster, state="readonly")
+            self.box_frame, 
+            values=["K-mean", "Hierarchical", "DBSCAN", "Mean Shift", "Spectral", "GMM", "Affinity Propagation", "BIRCH"], 
+            width=100, 
+            height=20, 
+            command=self.update_cluster, 
+            state="readonly"
+        )
 
         self.cluster_combo.grid(row=2, column=0, columnspan=3, sticky="w", pady=(10, 0), padx=5)
         self.cluster_combo.set("K-mean")
         self.cluster = self.cluster_combo.get()
 
-        self.instance2d = Cluster2DPlotClass(self.shared_container, self.cluster, self.df_c, self.cleaned_df, self.box_frame, self.box_frame_sub, self.on_button_click, self.legend_frame, self.selected_column)
-        self.instance3d = Cluster3DPlotClass(self.shared_container, self.cluster, self.df_c, self.cleaned_df, self.box_frame, self.box_frame_sub, self.on_button_click, self.legend_frame, self.selected_column)
-        self.loading_cluster_instance = loading_cluster(self.shared_container, self.cluster, self.loadings, self.box_frame, self.box_frame_sub, self.on_button_click, self.apply_button, self.legend_frame)
+        self.instance2d = Cluster2DPlotClass(
+            self.shared_container, 
+            self.cluster, 
+            self.df_c, 
+            self.cleaned_df, 
+            self.box_frame, 
+            self.box_frame_sub, 
+            self.on_button_click, 
+            self.legend_frame, 
+            self.selected_column
+        )
+        self.instance3d = Cluster3DPlotClass(
+            self.shared_container, 
+            self.cluster, 
+            self.df_c, 
+            self.cleaned_df, 
+            self.box_frame, 
+            self.box_frame_sub, 
+            self.on_button_click, 
+            self.legend_frame, 
+            self.selected_column
+        )
+        self.loading_cluster_instance = loading_cluster(
+            self.shared_container, 
+            self.cluster, 
+            self.loadings, 
+            self.box_frame, 
+            self.box_frame_sub, 
+            self.on_button_click, 
+            self.apply_button, 
+            self.legend_frame)
         if "sample id" in self.cleaned_df.columns:  
-            self.sample_cluster_instance = sample_cluster(self.shared_container, self.cluster, self.pca_df_scaled, self.df, self.cleaned_df, self.box_frame, self.box_frame_sub, self.on_button_click, self.apply_button, self.legend_frame)
+            self.sample_cluster_instance = sample_cluster(
+                self.shared_container, 
+                self.cluster, 
+                self.pca_df_scaled, 
+                self.df, 
+                self.cleaned_df, 
+                self.box_frame, 
+                self.box_frame_sub, 
+                self.on_button_click, 
+                self.apply_button, 
+                self.legend_frame)
         else:
             pass
 
