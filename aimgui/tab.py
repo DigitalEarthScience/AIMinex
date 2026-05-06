@@ -20,14 +20,25 @@ class SharedContainer:
         # Create a new tab with a title
         self.tab_count += 1
         title = f"Layout {self.tab_count}"
-        tab_frame = tk.Frame(self.tab_container, bd=1, relief=tk.RAISED, height=30)
-        tab_label = ctk.CTkLabel(tab_frame, text=title)
+        tab_frame = tk.Frame(
+            self.tab_container,
+            bd=1,
+            relief=tk.RAISED,
+            height=40
+        )
+        #tab_frame.pack_propagate(False)
+
+        tab_label = ctk.CTkLabel(
+            tab_frame,
+            text=title,
+            font=ctk.CTkFont(size=12, weight="bold")
+)
         tab_label.bind("<Double-1>", lambda event: self.edit_tab_label(tab_label))
-        custom_font = ctk.CTkFont(size=16)
-        close_button = ctk.CTkButton(tab_frame, text="x", width=25, height=25, border_width=0, font=custom_font, hover_color="darkgrey", text_color="black", command=lambda: self.close_tab(tab_frame, content_frame))
+        custom_font = ctk.CTkFont(size=12)
+        close_button = ctk.CTkButton(tab_frame, text="x", width=28, height=32, border_width=0, font=custom_font, hover_color="darkgrey", text_color="black", command=lambda: self.close_tab(tab_frame, content_frame))
         
-        close_button.pack(side=tk.RIGHT, padx=3, pady=3, fill=tk.Y)  
-        tab_label.pack(side=tk.LEFT, padx=3, pady=3, fill=tk.Y) 
+        close_button.pack(side=tk.RIGHT, padx=3, pady=3) #, fill=tk.Y)
+        tab_label.pack(side=tk.LEFT, padx=3, pady=3) #, fill=tk.Y)
 
         self.plus_button.pack_forget()
         tab_frame.pack(side=tk.LEFT, padx=2, pady=2)
@@ -53,7 +64,7 @@ class SharedContainer:
     
         for tab_frame, _ in self.tabs:
             tab_frame.config(width=tab_width)
-            tab_frame.pack_propagate(False)
+            #tab_frame.pack_propagate(False)
 
 
     def create_tab_button(self):

@@ -387,13 +387,13 @@ class class3d:
         self.arrow_list = []
         for i, name in enumerate(self.df.columns):
             ip = self.df.columns.get_loc(name)
-            arrow = self.ax.quiver(x_arr[ip], y_arr[ip], z_arr[ip], xs[ip], ys[ip], zs[ip], color='r', arrow_length_ratio=0.1, linewidth=0.5)
+            arrow = self.ax.quiver(x_arr[ip], y_arr[ip], z_arr[ip], xs.iloc[ip], ys.iloc[ip], zs.iloc[ip], color='r', arrow_length_ratio=0.1, linewidth=0.5)
             self.arrow_list.append(arrow)
 
         self.namelist = []
         for i, names in enumerate(show_names):
             ip = indx[i]
-            n = self.ax.text(xs[ip] + 0.02, ys[ip] + 0.02, zs[ip] + 0.02, names, fontsize='small')
+            n = self.ax.text(xs.iloc[ip] + 0.02, ys.iloc[ip] + 0.02, zs.iloc[ip] + 0.02, names, fontsize='small')
             self.namelist.append(n)
 
         selected_indices = self.multiselect_3d.curselection()
