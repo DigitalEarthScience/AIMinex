@@ -100,7 +100,7 @@ class class2d:
 
         # Multiselect listbox for selecting columns
         ctk.CTkLabel(self.box_frame_sub, text="Plot Eigenvectors:").pack(side="top", padx=5, pady=(10, 0))
-        self.multiselect_2d = tk.Listbox(self.box_frame_sub, selectmode=tk.MULTIPLE)
+        self.multiselect_2d = tk.Listbox(self.box_frame_sub, selectmode=tk.MULTIPLE, exportselection=False)
         self.multiselect_2d.pack(side="top", padx=5, pady=5)
         for names in self.df.columns.tolist():
             self.multiselect_2d.insert(tk.END, names)
@@ -189,21 +189,21 @@ class class2d:
                 return ((np.log(x + 1) - np.log(old_min + 1)) / (np.log(old_max + 1) - np.log(old_min + 1))) * (new_max - new_min) + new_min
                 
             # New logic for zn
-            def size_for_zn(x):
-                if x < 1000:
-                    return 20
-                elif 1000 <= x <= 9999:
-                    return 70
-                elif x > 10000:
-                    return 110
-                else:
-                    raise Exception ("size zn")
+            # def size_for_zn(x):
+            #     if x < 10000:
+            #         return 20
+            #     elif 10000 <= x <= 99999:
+            #         return 70
+            #     elif x > 100000:
+            #         return 120
+            #     else:
+            #         raise Exception ("size zn")
             
-            # Apply size mapping logic
-            if element_size == 'Zn_ppm':
-                sizes = self.df[element_size].apply(size_for_zn)
-            else:
-                sizes = self.df[element_size].apply(lambda x: map_size(x, 20, 100))
+            # # Apply size mapping logic
+            # if element_size == 'Zn_ppm':
+            #     sizes = self.df[element_size].apply(size_for_zn)
+            # else:
+            sizes = self.df[element_size].apply(lambda x: map_size(x, 20, 100))
 
             if column_to_use is not None:
                 for i in range(len(self.df)):
@@ -402,9 +402,9 @@ class class2d:
         self.x_arr = np.zeros(len(self.loadings[pc1]))
         self.y_arr = self.x_arr
 
-        max_x = max(abs(self.xs))
-        max_y = max(abs(self.ys))
-        arrow_scale = max(max_x, max_y) / 0.5
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        arrow_scale = max(xlim[1] - xlim[0], ylim[1] - ylim[0])
         
         for i, name in enumerate(self.df.columns):
             ip = self.df.columns.get_loc(name)
@@ -414,7 +414,7 @@ class class2d:
         namelist_2d = []
         for i, names in enumerate(show_names):
             ip = indx[i]
-            n = self.ax.text((1 / arrow_scale) * self.xs[ip], (1 / arrow_scale) * self.ys[ip], names, fontsize='small')
+            n = self.ax.text((1 / arrow_scale) * self.xs[ip], (1 / arrow_scale) * self.ys[ip], names, fontsize='small', ha='center', va='center')
             namelist_2d.append(n)
 
         selected_indices = self.multiselect_2d.curselection()

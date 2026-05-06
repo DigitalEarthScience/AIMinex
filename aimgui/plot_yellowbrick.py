@@ -20,6 +20,7 @@ def yellowbrick(self, X):
 
     visualizer.ax.set_yticklabels([])
     visualizer.finalize()
+    fig.tight_layout()
 
     self.canvas1 = FigureCanvasTkAgg(fig, master=self.legend_frame)
     toolbar = CustomToolbar(self.canvas1, self.legend_frame)

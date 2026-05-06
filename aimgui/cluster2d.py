@@ -58,9 +58,6 @@ class Cluster2DPlotClass:
         pil_image = Image.open(image_path)
 
         self.icon_image = CTkImage(light_image=pil_image, dark_image=pil_image, size=(32, 32))
-
-        print(pil_image)
-        print(self.icon_image)
         
         self.image_button = ctk.CTkLabel(self.box_frame, image=self.icon_image, text = "", width=20)
         self.image_button.grid(row=3, column=3, sticky="w", pady=0, padx=5)
