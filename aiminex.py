@@ -162,6 +162,33 @@ class MainApp(ctk.CTk):
         self.create_widgets()
         self.data_columns = None
         self.group_column = None
+        # Proper closing
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+    # Closing the App    
+    def on_closing(self):
+        try:
+            # Cancel pending after callbacks
+            for after_id in self.tk.call("after", "info"):
+                try:
+                    self.after_cancel(after_id)
+                except Exception:
+                    pass
+
+            # Close matplotlib figures
+            try:
+                import matplotlib.pyplot as plt
+                plt.close("all")
+            except Exception:
+                pass
+
+            self.quit()
+            self.destroy()
+
+        except Exception:
+            try:
+                self.destroy()
+            except Exception:
+                pass
 
     def toggle_box_frame_sub(self):
         if self.box_frame_sub_visible:
