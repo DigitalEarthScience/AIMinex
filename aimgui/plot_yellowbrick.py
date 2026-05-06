@@ -10,6 +10,9 @@ from yellowbrick.cluster import KElbowVisualizer, SilhouetteVisualizer
 def yellowbrick(self, X):
     plt.rcParams.update({"font.size": 10})
 
+    # -------------------------------
+    # Elbow Plot in a new tab
+    # -------------------------------    
     # Only use KElbowVisualizer for KMeans
     if getattr(self, "cluster_result", None) != "K-mean":
         print("KElbowVisualizer is only available for K-means clustering.")
